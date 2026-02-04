@@ -15,6 +15,9 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    networks:
+      - backend
+    
 
   nginx:
     image: nginx:alpine
@@ -26,6 +29,9 @@ services:
     depends_on:
       invoiceninja:
         condition: service_healthy
+    networks:
+      - backend
+      - dokploy-network
 
   mysql:
     image: mysql:8
@@ -37,6 +43,8 @@ services:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
     volumes:
       - mysql_data:/var/lib/mysql
+    networks:
+      - backend
     healthcheck:
       test:
         [
@@ -54,8 +62,16 @@ services:
     restart: unless-stopped
     volumes:
       - redis_data:/data
+    networks:
+      - backend
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
+
+networks:
+  backend:
+    internal: true
+  dokploy-network:
+    external: true
 
 volumes:
   app_public:
